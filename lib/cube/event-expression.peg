@@ -13,6 +13,10 @@
 
   function noop() {}
 
+  function everything(fields) {
+    delete fields.t;
+  }
+
   function filter(op) {
     return function(o, k, v) {
       var f = o[k];
@@ -90,7 +94,8 @@ event_filter_expression
   = op:filter_operator _ "(" _ member:event_member_expression _ "," _ value:literal _ ")" { return function(o) { op(o, member.field, value); }; }
 
 event_value_expression
-  = type:type _ "(" _ head:event_member_expression tail:(_ "," _ event_member_expression)* _ ")" { return compoundFields(type, head, tail); }
+  = type:type _ "(" _ "*" _ ")" { return {type: type, exists: noop, fields: everything}; }
+  / type:type _ "(" _ head:event_member_expression tail:(_ "," _ event_member_expression)* _ ")" { return compoundFields(type, head, tail); }
   / type:type { return {type: type, exists: noop, fields: noop}; }
 
 event_member_expression
